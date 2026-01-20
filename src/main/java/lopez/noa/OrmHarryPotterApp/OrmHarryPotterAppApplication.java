@@ -11,4 +11,3 @@ public class OrmHarryPotterAppApplication {
 	}
 
 }
-//git commit -m "feat: gran parte de la estructura de la API. Todo lo presnetefuncional"
