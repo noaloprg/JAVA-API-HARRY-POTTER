@@ -8,6 +8,7 @@ import lopez.noa.OrmHarryPotterApp.Mappers.VaritaMapper;
 import lopez.noa.OrmHarryPotterApp.Modelos.Varita;
 import lopez.noa.OrmHarryPotterApp.Repositorios.PersonajeRepository;
 import lopez.noa.OrmHarryPotterApp.Repositorios.VaritaRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class VaritaService implements IModeloService<VaritaResponseDTO, Integer>
         this.personajeRepo = personajeRepo;
     }
 
+    //GET
     @Override
     @Transactional(readOnly = true)
     public List<VaritaResponseDTO> getAll() {
@@ -48,31 +50,6 @@ public class VaritaService implements IModeloService<VaritaResponseDTO, Integer>
         return VaritaMapper.toVaritaResponse(varita);
     }
 
-    @Override
-    @Transactional
-    public VaritaResponseDTO deleteById(Integer id) {
-        //manejamos existencia a traves de la busqueda de la entidad
-        Varita varita = varitaRepo.findById(id).orElseThrow(() -> new ResourceNotFound(id, NOMBRE_ENTIDAD));
-        varitaRepo.deleteById(id);
-        return VaritaMapper.toVaritaResponse(varita);
-    }
-
-
-    @Transactional
-    public VaritaSummaryDTO createVarita(VaritaCreateDTO dto) {
-        //no tiene porque estar vinculada a un personaje
-        Varita varita = VaritaMapper.crearVaritaDesdeDTO(dto);
-        varitaRepo.save(varita);
-        return VaritaMapper.toVaritaSummary(varita);
-    }
-
-    @Transactional
-    public VaritaSummaryDTO updateVarita(Integer id, VaritaCreateDTO dto) {
-        Varita existente = varitaRepo.findById(id).orElseThrow(() -> new ResourceNotFound(id, NOMBRE_ENTIDAD));
-        VaritaMapper.asignarTodosCamposVarita(dto, existente);
-        varitaRepo.save(existente);
-        return VaritaMapper.toVaritaSummary(existente);
-    }
 
     @Transactional(readOnly = true)
     public List<VaritaResponseDTO> getAllRotas(boolean rota) {
@@ -98,6 +75,37 @@ public class VaritaService implements IModeloService<VaritaResponseDTO, Integer>
                 .map(v -> VaritaMapper.toVaritaSummary(v)).toList();
     }
 
+    public List<VaritaSummaryDTO> getOrdenadasUsadas(Boolean descendente, Boolean usadas) {
+        //crea el modo de ordenacion segun el booleano pasado por parametros
+        Sort ordenacion = descendente ? Sort.by("longitud").descending() : Sort.by("longitud").ascending();
+
+        //si solo quiere las que estan usadas
+        List<Varita> listaRespuesta = usadas
+                ? varitaRepo.findByPersonajeIsNotNull()
+                : varitaRepo.findByPersonajeIsNull();
+
+        return listaRespuesta.stream().map(var -> VaritaMapper.toVaritaSummary(var)).toList();
+    }
+
+
+    //ELIMINAR Y ACTUALIZAR
+    @Override
+    @Transactional
+    public VaritaResponseDTO deleteById(Integer id) {
+        //manejamos existencia a traves de la busqueda de la entidad
+        Varita varita = varitaRepo.findById(id).orElseThrow(() -> new ResourceNotFound(id, NOMBRE_ENTIDAD));
+        varitaRepo.deleteById(id);
+        return VaritaMapper.toVaritaResponse(varita);
+    }
+
+    @Transactional
+    public VaritaSummaryDTO updateVarita(Integer id, VaritaCreateDTO dto) {
+        Varita existente = varitaRepo.findById(id).orElseThrow(() -> new ResourceNotFound(id, NOMBRE_ENTIDAD));
+        VaritaMapper.asignarTodosCamposVarita(dto, existente);
+        varitaRepo.save(existente);
+        return VaritaMapper.toVaritaSummary(existente);
+    }
+
     @Transactional
     /*
     usuario solo indica el id y a traves del servicio, se modifica
@@ -108,4 +116,15 @@ public class VaritaService implements IModeloService<VaritaResponseDTO, Integer>
         var.setRota(true);
         return VaritaMapper.toVaritaResponse(var);
     }
+
+    //CREAR
+    @Transactional
+    public VaritaSummaryDTO createVarita(VaritaCreateDTO dto) {
+        //no tiene porque estar vinculada a un personaje
+        Varita varita = VaritaMapper.crearVaritaDesdeDTO(dto);
+        varitaRepo.save(varita);
+        return VaritaMapper.toVaritaSummary(varita);
+    }
+
+
 }

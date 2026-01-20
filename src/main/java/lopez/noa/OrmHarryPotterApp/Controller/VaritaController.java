@@ -52,11 +52,17 @@ public class VaritaController {
         return ResponseEntity.ok(servicio.getResumen());
     }
 
+    @GetMapping("/ordenadas")
+    public ResponseEntity<List<VaritaSummaryDTO>> getVaritasOrdenadas(@RequestParam Boolean descendente, @RequestParam Boolean usadas) {
+        return ResponseEntity.ok(servicio.getOrdenadasUsadas(descendente, usadas));
+    }
+
     //ACTUALIZACION
     @PutMapping("/varita/romper/{id}")
     public ResponseEntity<VaritaResponseDTO> setRomperVarita(@PathVariable("id") int id) {
         return ResponseEntity.ok(servicio.setRota(id));
     }
+
     @PutMapping("/varita/romper/android/{id}")
     public ResponseEntity<Boolean> setRomperVaritaAndroid(@PathVariable("id") int id) {
         return ResponseEntity.ok(servicio.setRota(id) != null);
@@ -76,6 +82,7 @@ public class VaritaController {
 
     @PostMapping("/crear")
     public ResponseEntity<Boolean> createVaritaAndroidStudio(@Valid @RequestBody VaritaCreateDTO varita) {
-        return ResponseEntity.ok(servicio.createVarita(varita) != null );
+        return ResponseEntity.ok(servicio.createVarita(varita) != null);
+
     }
 }
