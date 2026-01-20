@@ -4,6 +4,9 @@ import jakarta.validation.Valid;
 import lopez.noa.OrmHarryPotterApp.DTO.HechizoDTO.HechizoCreateDTO;
 import lopez.noa.OrmHarryPotterApp.DTO.HechizoDTO.HechizoResponseDTO;
 import lopez.noa.OrmHarryPotterApp.Servicios.HechizoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +26,19 @@ public class HechizoController {
         this.servicio = servicio;
     }
 
+    //GET
     @GetMapping
     public ResponseEntity<List<HechizoResponseDTO>> getAll() {
         return ResponseEntity.ok(servicio.getAll());
     }
 
+    //con paginacion
+    @GetMapping("/paginados")
+    public ResponseEntity<Page<HechizoResponseDTO>> getByPageable(@PageableDefault(size = 5, page = 0) Pageable paginacion) {
+        return ResponseEntity.ok(servicio.getSegunPaginado(paginacion));
+    }
+
+    //CREACION
     //insert masivo
     @PostMapping("/crear-masivo")
     public ResponseEntity<List<HechizoResponseDTO>> createVariosHechizos(@Valid @RequestBody List<HechizoCreateDTO> listaDto) {

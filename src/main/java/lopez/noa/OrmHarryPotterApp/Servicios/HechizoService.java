@@ -8,6 +8,8 @@ import lopez.noa.OrmHarryPotterApp.Exception.ResourceNotFound;
 import lopez.noa.OrmHarryPotterApp.Mappers.HechizoMapper;
 import lopez.noa.OrmHarryPotterApp.Modelos.Hechizo;
 import lopez.noa.OrmHarryPotterApp.Repositorios.HechizoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -31,6 +33,7 @@ public class HechizoService implements IModeloService<HechizoResponseDTO, BigInt
         this.hechizoRepo = hechizoRepo;
     }
 
+    //GET
     @Override
     public List<HechizoResponseDTO> getAll() {
         return hechizoRepo.findAll()
@@ -51,6 +54,14 @@ public class HechizoService implements IModeloService<HechizoResponseDTO, BigInt
         return HechizoMapper.toHechizoResponse(h);
     }
 
+    //getAll pero con paginacion
+    public Page<HechizoResponseDTO> getSegunPaginado(Pageable paginacion) {
+        return hechizoRepo.findAll(paginacion)
+                .map(hechizo -> HechizoMapper.toHechizoResponse(hechizo));
+
+    }
+
+    //BORRADO Y ACTUALIZADO
     @Override
     @Transactional
     public HechizoResponseDTO deleteById(BigInteger id) {
@@ -60,6 +71,16 @@ public class HechizoService implements IModeloService<HechizoResponseDTO, BigInt
         return HechizoMapper.toHechizoResponse(hechizo);
     }
 
+    @Transactional
+    public Hechizo update(BigInteger id, HechizoCreateDTO dto) {
+        Hechizo existente = hechizoRepo.findById(id).orElseThrow(() -> new ResourceNotFound(id, NOMBRE_ENTIDAD));
+        HechizoMapper.asignarTodosCamposHechizo(dto, existente);
+        hechizoRepo.save(existente);
+        return existente;
+    }
+
+
+    //CREACION
     @Transactional
     public Hechizo createHechizo(HechizoCreateDTO dto) {
         Hechizo hechizo = HechizoMapper.crearHechizoDesdeDTO(dto);
@@ -84,11 +105,4 @@ public class HechizoService implements IModeloService<HechizoResponseDTO, BigInt
         return listaRespuestas;
     }
 
-    @Transactional
-    public Hechizo update(BigInteger id, HechizoCreateDTO dto) {
-        Hechizo existente = hechizoRepo.findById(id).orElseThrow(() -> new ResourceNotFound(id, NOMBRE_ENTIDAD));
-        HechizoMapper.asignarTodosCamposHechizo(dto, existente);
-        hechizoRepo.save(existente);
-        return existente;
-    }
 }
