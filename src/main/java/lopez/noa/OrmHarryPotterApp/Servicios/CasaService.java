@@ -36,12 +36,7 @@ public class CasaService implements IModeloService<CasaResponseDTO, Integer> {
         return casaRepository.findAll()
                 .stream()
                 .map(casa ->
-                        new CasaResponseDTO(
-                                casa.getId(),
-                                casa.getEscudoImagen(),
-                                casa.getFundador(),
-                                casa.getNombre()
-                        ))
+                        CasaMapper.toCasaResponse(casa))
                 .toList();
     }
 
